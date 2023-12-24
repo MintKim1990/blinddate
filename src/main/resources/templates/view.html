@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <meta charset="UTF-8">
-	<title>DevLog Chating</title>
+	<title>Chating</title>
 	<style>
 		*{
 			margin:0;
@@ -50,12 +50,14 @@
 	</style>
 </head>
 
-<script type="text/javascript">
+<script th:inline="javascript" type="text/javascript">
+
+	var name = [[${name}]]
 	var ws;
 
 	function wsOpen(){
 		//websocket을 지정한 URL로 연결
-		ws = new WebSocket("ws://" + location.host + "/ws/chat?chatRoomId=" + $("#roomId").val());
+		ws = new WebSocket("ws://" + location.host + "/ws/chat?chatRoomId=" + [[${chatRoomId}]]);
 		wsEvt();
 	}
 
@@ -64,7 +66,7 @@
 		ws.onopen = function(e){
 			var obj ={
 				command: "JOIN",
-				sender : $("#sender").val()
+				sender : name
 			}
 			//서버에 데이터 전송
 			ws.send(JSON.stringify(obj))
@@ -103,46 +105,26 @@
 		});
 	}
 
-	function chatName(){
-		var sender = $("#sender").val();
-		if(sender == null || sender.trim() == ""){
-			alert("사용자 이름을 입력해주세요.");
-			$("#sender").focus();
-		}else{
-			wsOpen();
-			$("#yourName").hide();
-			$("#yourMsg").show();
-		}
-	}
-
 	function send() {
 		var obj ={
 			command: "TALK",
-			sender : $("#sender").val(),
+			sender : name,
 			message : $("#chatting").val()
 		}
 		//서버에 데이터 전송
 		ws.send(JSON.stringify(obj))
 		$('#chatting').val("");
 	}
+
+	wsOpen()
 </script>
 <body>
 	<div id="container" class="container">
-		<h1>DevLog Chat</h1>
+		<h1>Chat</h1>
 
 		<div id="chating" class="chating">
 		</div>
 
-		<input id="roomId" value="">방ID</input>
-		<div id="yourName">
-			<table class="inputTable">
-				<tr>
-					<th>닉네임</th>
-					<th><input type="text" name="sender" id="sender"></th>
-					<th><button onclick="chatName()" id="startBtn">채팅 참가</button></th>
-				</tr>
-			</table>
-		</div>
 		<div id="yourMsg">
 			<table class="inputTable">
 				<tr>

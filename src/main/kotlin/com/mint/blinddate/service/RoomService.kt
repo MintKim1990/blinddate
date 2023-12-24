@@ -26,9 +26,9 @@ class RoomService(
         const val ROOM_KEY = "ChatRoom"
     }
 
-    fun createRoom(name: String) {
+    fun createRoom(name: String): ChatRoom {
         val ops = redisTemplate.opsForHash<String, String>()
-        ChatRoom(name).let {
+        return ChatRoom(name).also {
             ops.putIfAbsent(ROOM_KEY, it.id, objectMapper.writeValueAsString(it)).subscribe()
             roomMap.putIfAbsent(it.id, ChatRoomMessageStream(it.id, reactiveRedisMessageListenerContainer))
         }

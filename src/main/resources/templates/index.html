@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Chating</title>
+</head>
+<script type="text/javascript">
+
+	function join(roomId){
+		var name = $("#name").val();
+		if(name == null || name.trim() == ""){
+			alert("닉네임을 입력해주세요.");
+			$("#name").focus();
+		} else {
+            window.location.href = window.location.origin + "/chat/join?chatRoomId=" + roomId + "&name=" + name
+		}
+	}
+
+	function createRoom(){
+
+		var roomName = $("#roomName").val();
+		if(roomName == null || roomName.trim() == ""){
+			alert("방이름을 입력해주세요.");
+			$("#roomName").focus();
+			return
+		}
+
+		var name = $("#name").val();
+		if(name == null || name.trim() == ""){
+			alert("닉네임을 입력해주세요.");
+			$("#name").focus();
+			return
+		}
+
+		$.ajax({
+                type : "POST",
+                url : "/chat?name=" + roomName,
+                success : function(res){ // 비동기통신의 성공일경우 success콜백으로 들어옵니다. 'res'는 응답받은 데이터이다.
+                    window.location.href = window.location.origin + "/chat/join?chatRoomId=" + res.id + "&name=" + name
+                },
+                error : function(XMLHttpRequest, textStatus, errorThrown){ // 비동기 통신이 실패할경우 error 콜백으로 들어옵니다.
+                    alert("실패.")
+                }
+        });
+	}
+
+	function send() {
+		var obj ={
+			command: "TALK",
+			sender : $("#sender").val(),
+			message : $("#chatting").val()
+		}
+		//서버에 데이터 전송
+		ws.send(JSON.stringify(obj))
+		$('#chatting').val("");
+	}
+</script>
+<body>
+    <div id="container" class="container">
+        <h1>Chat</h1>
+        <div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>방이름</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="room : ${rooms}">
+                    <td><div>[[${room.name}]]</div></td>
+                    <td><button th:onclick="join([[${room.id}]])">참가하기</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <div>닉네임
+                <input id="name" value="" style="width:200px"/>
+            </div>
+        </div>
+        <br>
+        <div>
+            <div>방 이름
+                <input id="roomName" value="" style="width:500px">
+                <button onclick="createRoom()">방만들기</button>
+                </input>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
