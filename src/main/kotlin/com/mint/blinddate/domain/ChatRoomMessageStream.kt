@@ -1,4 +1,4 @@
-package com.mint.blinddate.service
+package com.mint.blinddate.domain
 
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer

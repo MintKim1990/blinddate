@@ -10,6 +10,6 @@ class ChatRestController(
 ) {
 
     @PostMapping
-    fun createRoom(@RequestParam name: String) = roomService.createRoom(name)
+    suspend fun createRoom(@RequestParam name: String) = roomService.createRoom(name)
 
 }

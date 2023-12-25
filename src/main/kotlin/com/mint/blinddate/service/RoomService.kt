@@ -2,6 +2,12 @@ package com.mint.blinddate.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mint.blinddate.domain.ChatRoom
+import com.mint.blinddate.domain.ChatRoomMessageStream
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.flux
 import mu.KotlinLogging
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
@@ -26,18 +32,20 @@ class RoomService(
         const val ROOM_KEY = "ChatRoom"
     }
 
-    fun createRoom(name: String): ChatRoom {
+    suspend fun createRoom(name: String): ChatRoom {
         val ops = redisTemplate.opsForHash<String, String>()
         return ChatRoom(name).also {
-            ops.putIfAbsent(ROOM_KEY, it.id, objectMapper.writeValueAsString(it)).subscribe()
+            ops.putIfAbsent(ROOM_KEY, it.id, objectMapper.writeValueAsString(it)).awaitSingle()
             roomMap.putIfAbsent(it.id, ChatRoomMessageStream(it.id, reactiveRedisMessageListenerContainer))
         }
     }
 
-    fun findRooms(): Flux<ChatRoom> {
+    suspend fun findRooms(): List<ChatRoom> {
         val ops = redisTemplate.opsForHash<String, String>()
         return ops.values(ROOM_KEY)
             .map { objectMapper.readValue(it, ChatRoom::class.java) }
+            .asFlow()
+            .toList()
     }
 
     fun subscribe(session: WebSocketSession, chatRoomId: String): Flux<WebSocketMessage> {

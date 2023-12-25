@@ -14,10 +14,7 @@ import java.time.Duration
 
 @Component
 class WebSocketChatHandler(
-    private val objectMapper: ObjectMapper,
-    private val messagePublisher: MessagePublisher,
     private val roomService: RoomService,
-    private val reactiveRedisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
 ) : WebSocketHandler {
 
     private val logger = KotlinLogging.logger {}
@@ -29,11 +26,6 @@ class WebSocketChatHandler(
     override fun handle(session: WebSocketSession): Mono<Void> {
 
         logger.info { "최초접근 sessionId : ${session.id}" }
-
-
-
-
-
 
         val chatRoomId = getChatRoomId(session)
 

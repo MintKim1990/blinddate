@@ -14,13 +14,13 @@ class ChatViewController(
 ) {
 
     @GetMapping("/view")
-    suspend fun init(model: Model): String {
-        model.addAttribute("rooms", roomService.findRooms().blockLast())
+    suspend fun view(model: Model): String {
+        model.addAttribute("rooms", roomService.findRooms())
         return "index"
     }
 
     @GetMapping("/join")
-    fun view(@RequestParam chatRoomId: String,
+    suspend fun join(@RequestParam chatRoomId: String,
              @RequestParam name: String,
              model: Model): String {
         model.addAttribute("chatRoomId", chatRoomId)

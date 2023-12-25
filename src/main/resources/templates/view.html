@@ -81,7 +81,7 @@
 
 				//채팅 메시지를 전달받은 경우
 				if(d.command == "TALK"){
-					if(d.sender == $("#sender").val()){
+					if(d.sender == name){
 						$("#chating").append("<p class='me'>" + d.message + "</p>");
 					}else{
 						$("#chating").append("<p class='others'>" + d.sender + " : " + d.message + "</p>");
