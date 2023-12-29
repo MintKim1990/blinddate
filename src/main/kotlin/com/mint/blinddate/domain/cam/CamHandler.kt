@@ -1,4 +1,4 @@
-package com.mint.blinddate.domain.single
+package com.mint.blinddate.domain.cam
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
@@ -8,7 +8,7 @@ import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 
 @Component
-class SingleCamHandler(
+class CamHandler(
     private val objectMapper: ObjectMapper,
 ) : WebSocketHandler {
 
@@ -18,21 +18,21 @@ class SingleCamHandler(
         logger.info { "message : $session" }
         val message = session.receive()
             .map {
-                objectMapper.readValue(it.payloadAsText, SingleCamMessage::class.java)
+                objectMapper.readValue(it.payloadAsText, CamMessage::class.java)
             }
             .log()
 
         return message.then()
     }
 
-    fun messageHandle(message: SingleCamMessage): String {
+    fun messageHandle(message: CamMessage): String {
         return when(message.type) {
-            SingleCamMessageCommand.JOIN -> ""
-            SingleCamMessageCommand.OFFER -> ""
-            SingleCamMessageCommand.ANSWER -> ""
-            SingleCamMessageCommand.TEXT -> ""
-            SingleCamMessageCommand.ICE -> ""
-            SingleCamMessageCommand.LEAVE -> ""
+            CamMessageCommand.JOIN -> ""
+            CamMessageCommand.OFFER -> ""
+            CamMessageCommand.ANSWER -> ""
+            CamMessageCommand.TEXT -> ""
+            CamMessageCommand.ICE -> ""
+            CamMessageCommand.LEAVE -> ""
             else -> throw IllegalArgumentException("지원하지 않는 기능입니다.")
         }
     }

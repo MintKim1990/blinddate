@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
-class ChatRoomService(
+class ChatService(
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
     private val reactiveRedisMessageListenerContainer: ReactiveRedisMessageListenerContainer
