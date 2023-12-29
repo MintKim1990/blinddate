@@ -1,4 +1,4 @@
-package com.mint.blinddate.domain
+package com.mint.blinddate.domain.chat
 
 import java.util.*
 

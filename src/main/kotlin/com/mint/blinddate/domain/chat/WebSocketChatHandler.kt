@@ -1,9 +1,7 @@
-package com.mint.blinddate.domain
+package com.mint.blinddate.domain.chat
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.mint.blinddate.service.RoomService
+import com.mint.blinddate.service.chat.ChatRoomService
 import mu.KotlinLogging
-import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketMessage
@@ -14,7 +12,7 @@ import java.time.Duration
 
 @Component
 class WebSocketChatHandler(
-    private val roomService: RoomService,
+    private val chatRoomService: ChatRoomService,
 ) : WebSocketHandler {
 
     private val logger = KotlinLogging.logger {}
@@ -32,13 +30,13 @@ class WebSocketChatHandler(
         val sendMessage = session.receive()
             .log("${session.id} Receive")
             .filter { it.type == WebSocketMessage.Type.TEXT }
-            .flatMap { roomService.publish(it, chatRoomId) }
+            .flatMap { chatRoomService.publish(it, chatRoomId) }
 
         val ping = Flux.interval(Duration.ofSeconds(20))
             .map { session.pingMessage { session.bufferFactory().allocateBuffer() } }
 
         val receiveMessage = session.send(
-            Flux.merge(roomService.subscribe(session, chatRoomId), ping)
+            Flux.merge(chatRoomService.subscribe(session, chatRoomId), ping)
                 .log("${session.id} Send")
         )
 

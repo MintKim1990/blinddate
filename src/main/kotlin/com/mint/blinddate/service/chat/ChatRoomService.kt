@@ -1,13 +1,13 @@
-package com.mint.blinddate.service
+package com.mint.blinddate.service.chat
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.mint.blinddate.domain.ChatRoom
-import com.mint.blinddate.domain.ChatRoomMessageStream
-import kotlinx.coroutines.*
+import com.mint.blinddate.domain.chat.ChatRoom
+import com.mint.blinddate.domain.chat.ChatRoomMessageStream
+import com.mint.blinddate.service.ChatRequest
+import com.mint.blinddate.service.MessageCommand
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.flux
 import mu.KotlinLogging
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
-class RoomService(
+class ChatRoomService(
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
     private val reactiveRedisMessageListenerContainer: ReactiveRedisMessageListenerContainer
