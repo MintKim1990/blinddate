@@ -30,8 +30,9 @@ class ViewController(
 
     @ResponseBody
     @PostMapping("/room/chat")
-    suspend fun createChatRoom(@RequestParam name: String) =
-        chatService.createRoom(name)
+    suspend fun createChatRoom(@RequestParam name: String,
+                               @RequestParam owner: String) =
+        chatService.createRoom(name, owner)
 
     @ResponseBody
     @PostMapping("/room/cam")

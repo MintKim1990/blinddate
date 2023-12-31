@@ -1,6 +1,13 @@
 package com.mint.blinddate.domain.chat
 
 import com.mint.blinddate.service.chat.ChatService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.future
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.asFlux
+import kotlinx.coroutines.reactor.flux
+import kotlinx.coroutines.reactor.mono
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -36,11 +43,13 @@ class ChatHandler(
             .map { session.pingMessage { session.bufferFactory().allocateBuffer() } }
 
         val receiveMessage = session.send(
-            Flux.merge(chatService.subscribe(session, chatRoomId), ping)
-                .log("${session.id} Send")
+            Flux.merge(
+                chatService.subscribe(session, chatRoomId),
+                ping
+            ).log("${session.id} Send")
         )
 
-        return Flux.zip(sendMessage, receiveMessage).then()
+        return Flux.zip(receiveMessage, sendMessage).then()
     }
 
     private fun getChatRoomId(session: WebSocketSession) : String {

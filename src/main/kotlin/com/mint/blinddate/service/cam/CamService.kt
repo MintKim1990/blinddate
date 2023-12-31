@@ -15,7 +15,7 @@ class CamService(
 ) {
 
     private val logger = KotlinLogging.logger {}
-    private val roomMap : ConcurrentHashMap<String, CamRoom> = ConcurrentHashMap()
+    private val camRooms : ConcurrentHashMap<String, CamRoom> = ConcurrentHashMap()
 
     companion object {
         const val ROOM_KEY = "CamRoom"

@@ -57,7 +57,7 @@
 
 	function wsOpen(){
 		//websocket을 지정한 URL로 연결
-		ws = new WebSocket("ws://" + location.host + "/chat?chatRoomId=" + [[${chatRoomId}]]);
+		ws = new WebSocket("wss://" + location.host + "/chat?chatRoomId=" + [[${chatRoomId}]]);
 		wsEvt();
 	}
 

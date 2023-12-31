@@ -38,7 +38,7 @@
 		var roomType = $("#roomType option:selected").val();
 		var url = "";
 		if (roomType == 'chat') {
-		    url = "/view/room/chat?name=" + roomName
+		    url = "/view/room/chat?name=" + roomName + "&owner=" + name
 		}
 		if (roomType == 'cam') {
 		    url = "/view/room/cam?name=" + roomName + "&owner=" + name

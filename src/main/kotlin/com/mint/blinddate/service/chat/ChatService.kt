@@ -8,6 +8,7 @@ import com.mint.blinddate.service.MessageCommand
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import mu.KotlinLogging
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
@@ -32,12 +33,18 @@ class ChatService(
         const val ROOM_KEY = "ChatRoom"
     }
 
-    suspend fun createRoom(name: String): ChatRoom {
+    suspend fun createRoom(name: String, owner: String): ChatRoom {
         val ops = redisTemplate.opsForHash<String, String>()
-        return ChatRoom(name).also {
+        return ChatRoom(name, owner).also {
             ops.putIfAbsent(ROOM_KEY, it.id, objectMapper.writeValueAsString(it)).awaitSingle()
             roomMap.putIfAbsent(it.id, ChatRoomMessageStream(it.id, reactiveRedisMessageListenerContainer))
         }
+    }
+
+    suspend fun hasRoom(chatRoomId: String): Boolean {
+        return redisTemplate.opsForHash<String, String>()
+            .hasKey(ROOM_KEY, chatRoomId)
+            .awaitSingle() ?: throw IllegalArgumentException("종료된 방입니다.")
     }
 
     suspend fun findRooms(): List<ChatRoom> {
@@ -53,15 +60,35 @@ class ChatService(
             stream.asStream()
                 .doOnCancel { clearRoom(stream, chatRoomId) }
                 .map { session.textMessage(it) }
-        } ?: throw IllegalArgumentException("종료된 방입니다.")
+                .log("subscribe")
+        } ?: addSubscribe(session, chatRoomId)
+    }
+
+    private fun addSubscribe(session: WebSocketSession, chatRoomId: String): Flux<WebSocketMessage> {
+        return mono { hasRoom(chatRoomId) }
+            .flatMapMany {
+                if (it) {
+                    val messageStream = ChatRoomMessageStream(chatRoomId, reactiveRedisMessageListenerContainer)
+                    roomMap.putIfAbsent(chatRoomId, messageStream)
+                    messageStream.asStream()
+                        .doOnCancel { clearRoom(messageStream, chatRoomId) }
+                        .map { message -> session.textMessage(message) }
+                        .log("add subscribe")
+                } else {
+                    throw IllegalArgumentException("종료된 방입니다.")
+                }
+            }
     }
 
     private fun clearRoom(stream: ChatRoomMessageStream, chatRoomId: String) {
         if (stream.isChatRoomEmpty()) {
             stream.dispose()
             roomMap.remove(chatRoomId)
-            // TODO 분산환경일때를 기준으로 레디스 채팅방 인원 수 체크하여 방 제거 체크로직 필요
-            redisTemplate.opsForHash<String, String>().remove(ROOM_KEY, chatRoomId).subscribe()
+            redisTemplate.opsForHash<String, String>().get(ROOM_KEY, chatRoomId)
+                .map { objectMapper.readValue(it, ChatRoom::class.java) }
+                .filter { it.isRoomEmpty() }
+                .doOnNext { redisTemplate.opsForHash<String, String>().remove(ROOM_KEY, it.id) }
+                .subscribe()
         }
     }
 
