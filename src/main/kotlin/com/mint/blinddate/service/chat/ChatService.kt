@@ -60,7 +60,6 @@ class ChatService(
             stream.asStream()
                 .doOnCancel { clearRoom(stream, chatRoomId) }
                 .map { session.textMessage(it) }
-                .log("subscribe")
         } ?: addSubscribe(session, chatRoomId)
     }
 
@@ -73,7 +72,6 @@ class ChatService(
                     messageStream.asStream()
                         .doOnCancel { clearRoom(messageStream, chatRoomId) }
                         .map { message -> session.textMessage(message) }
-                        .log("add subscribe")
                 } else {
                     throw IllegalArgumentException("종료된 방입니다.")
                 }

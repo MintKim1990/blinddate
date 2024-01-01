@@ -30,12 +30,9 @@ class ChatHandler(
 
     override fun handle(session: WebSocketSession): Mono<Void> {
 
-        logger.info { "최초접근 sessionId : ${session.id}" }
-
         val chatRoomId = getChatRoomId(session)
 
         val sendMessage = session.receive()
-            .log("${session.id} Receive")
             .filter { it.type == WebSocketMessage.Type.TEXT }
             .flatMap { chatService.publish(it, chatRoomId) }
 
@@ -43,13 +40,10 @@ class ChatHandler(
             .map { session.pingMessage { session.bufferFactory().allocateBuffer() } }
 
         val receiveMessage = session.send(
-            Flux.merge(
-                chatService.subscribe(session, chatRoomId),
-                ping
-            ).log("${session.id} Send")
+            Flux.merge(chatService.subscribe(session, chatRoomId), ping)
         )
 
-        return Flux.zip(receiveMessage, sendMessage).then()
+        return Flux.merge(receiveMessage, sendMessage).then()
     }
 
     private fun getChatRoomId(session: WebSocketSession) : String {
