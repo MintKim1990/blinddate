@@ -1,1 +1,1 @@
-# blinddate
+# Webflux 기반 채팅, WebRTC 기반에 1:1 화상, 1:N 방송 샘플코드 작성 프로젝트
