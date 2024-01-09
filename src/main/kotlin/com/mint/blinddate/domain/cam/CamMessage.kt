@@ -2,7 +2,7 @@ package com.mint.blinddate.domain.cam
 
 data class CamMessage(
     val from: String,
-    val type: CamMessageCommand,
+    val command: CamMessageCommand,
     val data: String,
     var candidate: String?,
     var sdp: String?,

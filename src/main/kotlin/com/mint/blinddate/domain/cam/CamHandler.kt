@@ -1,6 +1,8 @@
 package com.mint.blinddate.domain.cam
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mint.blinddate.domain.cam.CamMessageCommand.*
+import com.mint.blinddate.service.cam.CamService
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -10,6 +12,7 @@ import reactor.core.publisher.Mono
 @Component
 class CamHandler(
     private val objectMapper: ObjectMapper,
+    private val camService: CamService,
 ) : WebSocketHandler {
 
     private val logger = KotlinLogging.logger {}
@@ -23,18 +26,6 @@ class CamHandler(
             .log()
 
         return message.then()
-    }
-
-    fun messageHandle(message: CamMessage): String {
-        return when(message.type) {
-            CamMessageCommand.JOIN -> ""
-            CamMessageCommand.OFFER -> ""
-            CamMessageCommand.ANSWER -> ""
-            CamMessageCommand.TEXT -> ""
-            CamMessageCommand.ICE -> ""
-            CamMessageCommand.LEAVE -> ""
-            else -> throw IllegalArgumentException("지원하지 않는 기능입니다.")
-        }
     }
 
 }

@@ -186,7 +186,7 @@ function sendToServer(msg) {
 function handlePeerConnection(message) {
     createPeerConnection(); // 피어 연결
     getMedia(mediaConstraints); // 미디어 가져오기
-    if (message.data === "true") {
+    if (message.data === "negotiate") {
         myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
     }
 }
